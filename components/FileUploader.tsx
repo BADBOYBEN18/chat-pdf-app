@@ -19,17 +19,22 @@ function FileUploader() {
 
   useEffect(() => {
     if (fileId) {
+      router.push(`/dashboard/files/${fileId}`);
     }
   }, [fileId, router]);
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    // Do something with the files
-    const file = acceptedFiles[0];
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      // Do something with the files
+      const file = acceptedFiles[0];
 
-    if (file) {
-      await handleUpload(file);
-    }
-  }, []);
+      if (file) {
+        await handleUpload(file);
+      }
+    },
+    [handleUpload]
+  );
+
   const { getRootProps, getInputProps, isDragActive, isFocused, isDragAccept } =
     useDropzone({
       onDrop,

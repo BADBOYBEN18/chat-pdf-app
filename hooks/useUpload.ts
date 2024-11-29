@@ -22,12 +22,12 @@ function useUpload() {
   const [fileId, setFileId] = useState<string | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
   const { user } = useUser();
-  const router = useRouter;
+  const router = useRouter();
 
   const handleUpload = async (file: File) => {
-    if (!file || user) return;
+    if (!file || !user) return;
 
-    // FREE OR PRO LIMITATIONS...
+    //? FREE OR PRO LIMITATIONS...
 
     const fileIdToUploadTo = uuidv4();
 
@@ -66,10 +66,12 @@ function useUpload() {
         });
 
         setStatus(StatusText.GENERATING);
-        setFileId(fileIdToUploadTo)
+        setFileId(fileIdToUploadTo);
       }
     );
   };
+
+  return { progress, status, fileId, handleUpload };
 }
 
 export default useUpload;
