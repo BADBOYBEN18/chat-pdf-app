@@ -2,11 +2,12 @@
 'use client';
 import React, { useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import useUpload from '@/hooks/useUpload';
+import useUpload, { StatusText } from '@/hooks/useUpload';
 import { useRouter } from 'next/navigation';
 
 import {
   CheckCircleIcon,
+  CheckIcon,
   CircleArrowDown,
   HammerIcon,
   RocketIcon,
@@ -34,6 +35,18 @@ function FileUploader() {
     },
     [handleUpload]
   );
+  const statusIcons: {
+    [key in StatusText]: JSX.Element;
+  } = {
+    [StatusText.UPLOADING]: (
+      <RocketIcon className="h-20 w-20 text-indigo-600" />
+    ),
+    [StatusText.UPLOADED]: <CheckIcon className="h-20 w-20 text-indigo-600" />,
+    [StatusText.SAVING]: <SaveIcon className="h-20 w-20 text-indigo-600" />,
+    [StatusText.GENERATING]: (
+      <HammerIcon className="h-20 w-20 text-indigo-600" />
+    ),
+  };
 
   const { getRootProps, getInputProps, isDragActive, isFocused, isDragAccept } =
     useDropzone({
@@ -44,30 +57,61 @@ function FileUploader() {
       },
     });
 
+  const uploadinprogress = progress != null && progress >= 0 && progress <= 100;
+
   return (
     <div className="flex flex-col gap-4 items-center max-w-7xl mx-auto">
-      <div
-        {...getRootProps()}
-        className={`p-10 border-2 mt-10 w-[90%] border-dashed border-indigo-600 text-indigo-600 cursor-pointer rounded-lg h-96 flex justify-center items-center ${
-          isFocused || isDragAccept ? 'bg-indigo-300' : 'bg-indigo-100'
-        }`}
-      >
-        <input {...getInputProps()} />
+      {uploadinprogress && (
+        <div className="mt-32 flex flex-col justify-center items-center gap-5">
+          <div
+            className={`radial-progress bg-indigo-300 text-white border-indigo-600 border-4 ${
+              progress === 100 && 'hidden'
+            }`}
+            role="progressbar"
+            style={{
+              //@ts-ignore
+              '--value': progress,
+              '--size': '12rem',
+              '--thickness': '1.3rem',
+            }}
+          >
+            {progress} %
+          </div>
+          {/* render status icon */}
+          {
+            // @ts-ignore
+            statusIcons[status!]
+          }
 
-        <div className="flex flex-col items-center justify-center">
-          {isDragActive ? (
-            <>
-              <RocketIcon className="h-20 w-20 animate-ping" />
-              <p>Drop the files here ...</p>
-            </>
-          ) : (
-            <>
-              <CircleArrowDown className="h-20 w-20 animate-bounce" />
-              <p>Drag 'n' drop some files here, or click to select files</p>
-            </>
-          )}
+          {/* @ts-ignore */}
+          <p>{status}</p>
         </div>
-      </div>
+      )}
+
+      {!uploadinprogress && (
+        <div
+          {...getRootProps()}
+          className={`p-10 border-2 mt-10 w-[90%] border-dashed border-indigo-600 text-indigo-600 cursor-pointer rounded-lg h-96 flex justify-center items-center ${
+            isFocused || isDragAccept ? 'bg-indigo-300' : 'bg-indigo-100'
+          }`}
+        >
+          <input {...getInputProps()} />
+
+          <div className="flex flex-col items-center justify-center">
+            {isDragActive ? (
+              <>
+                <RocketIcon className="h-20 w-20 animate-ping" />
+                <p>Drop the files here ...</p>
+              </>
+            ) : (
+              <>
+                <CircleArrowDown className="h-20 w-20 animate-bounce" />
+                <p>Drag 'n' drop some files here, or click to select files</p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
